@@ -59,6 +59,8 @@ def ProductListSearch(driver, url, category_list):
             except:
                 print("상품디테일정보 긁어오기에서 실패했어요 ㅠㅠ")
             driver.switch_to.window(driver.window_handles[1])
+
+            
         # 다음버튼 클릭
         pre_url = cur_url
         driver.find_element(

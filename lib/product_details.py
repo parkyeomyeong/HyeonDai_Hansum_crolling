@@ -1,10 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
 
 import re
 import time
 
 from lib.make_sub_csv import SaveColorCSVOfProduct, SaveDetailOfProduct
+from lib.crop_image import save_prod_detail_image
 
 
 def ProductDetailSearch(driver,  product_brand_name, category_list, thumbnail_urls_of_product):
@@ -22,7 +24,7 @@ def ProductDetailSearch(driver,  product_brand_name, category_list, thumbnail_ur
         fit_info = driver.find_element(
             By.CSS_SELECTOR, "#contentDiv > div.info > div:nth-child(1) > div.prod-detail-con-box > div.fit-info > p").get_attribute("innerText")
     except:
-        print(product_name+"는 피팅정보가 없네요")
+        fit_info = ""
 
     # size_li = driver.find_elements(
     #     By.CSS_SELECTOR, "#color_size > ul > li:nth-child(2) > span.txt > ul > li")
@@ -64,6 +66,21 @@ def ProductDetailSearch(driver,  product_brand_name, category_list, thumbnail_ur
                 elif row[0].strip() == '제조연월':
                     manufacturer_ym = row[1].strip()
 
+        # 실측사이즈 스크린샷
+        elif dt_tag.find_element(By.CSS_SELECTOR, "dt > a").text == "실측사이즈":
+            dt_tag.find_element(
+                By.CSS_SELECTOR, "dt > a").send_keys(Keys.ENTER)
+            time.sleep(0.2)
+            img_out_path = f"image/{product_id}.png"
+            width = driver.execute_script(
+                "return document.body.scrollWidth")  # 스크롤 할 수 있는 최대 넓이
+            height = driver.execute_script(
+                "return document.body.scrollHeight")  # 스크롤 할 수 있는 최대 높이
+            driver.set_window_size(width, height)  # 스크롤 할 수 있는 모든 부분을 지정
+            driver.save_screenshot(img_out_path)
+            element = driver.find_element(
+                By.XPATH, f"//*[@id=\"contentDiv\"]/div[1]/dl/dd[{idx+1}]")
+            save_prod_detail_image(element, img_out_path)
     # size_li = []
     # sizes = driver.find_elements(
     #     By.CSS_SELECTOR, "#color_size > ul > li:nth-child(2) > span.txt > ul > li")
